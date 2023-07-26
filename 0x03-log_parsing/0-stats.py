@@ -1,36 +1,47 @@
 #!/usr/bin/python3
-'''Module for log parsing script.'''
+"""
+Task - Script that reads stdin line by line and computes metrics
+"""
+
 import sys
 
-if __name__ == "__main__":
-    size = [0]
-    codes = {200: 0, 301: 0, 400: 0, 401: 0, 403: 0, 404: 0, 405: 0, 500: 0}
 
-    def check_match(line):
-        '''Checks for regexp match in line.'''
+if __name__ == "__main__":
+    st_code = {"200": 0,
+               "301": 0,
+               "400": 0,
+               "401": 0,
+               "403": 0,
+               "404": 0,
+               "405": 0,
+               "500": 0}
+    count = 1
+    file_size = 0
+
+    def parse_line(line):
+        """ Read, parse and grab data"""
         try:
-            line = line[:-1]
-            words = line.split(" ")
-            size[0] += int(words[-1])
-            code = int(words[-2])
-            if code in codes:
-                codes[code] += 1
-        except:
-            pass
+            parsed_line = line.split()
+            status_code = parsed_line[-2]
+            if status_code in st_code.keys():
+                st_code[status_code] += 1
+            return int(parsed_line[-1])
+        except Exception:
+            return 0
 
     def print_stats():
-        '''Prints accumulated statistics.'''
-        print("File size: {}".format(size[0]))
-        for k in sorted(codes.keys()):
-            if codes[k]:
-                print("{}: {}".format(k, codes[k]))
-    i = 1
+        """print stats in ascending order"""
+        print("File size: {}".format(file_size))
+        for key in sorted(st_code.keys()):
+            if st_code[key]:
+                print("{}: {}".format(key, st_code[key]))
+
     try:
         for line in sys.stdin:
-            check_match(line)
-            if i % 10 == 0:
+            file_size += parse_line(line)
+            if count % 10 == 0:
                 print_stats()
-            i += 1
+            count += 1
     except KeyboardInterrupt:
         print_stats()
         raise
