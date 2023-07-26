@@ -1,48 +1,46 @@
 #!/usr/bin/python3
-"""
-Task - Script that reads stdin line by line and computes metrics
-"""
+
+""" Script that reads stdin line by line and computes metrics """
 
 import sys
 
 
-if __name__ == "__main__":
-    st_code = {"200": 0,
-               "301": 0,
-               "400": 0,
-               "401": 0,
-               "403": 0,
-               "404": 0,
-               "405": 0,
-               "500": 0}
-    count = 1
-    file_size = 0
+def print_statistics(status_codes, total_size):
+    """ Prints information """
+    print(f"File size: {total_size}")
+    for status_code, count in sorted(status_codes.items()):
+        if count != 0:
+            print(f"{status_code}: {count}")
 
-    def parse_line(line):
-        """ Read, parse and grab data"""
+
+status_codes = {"200": 0, "301": 0, "400": 0, "401": 0, "403": 0,
+                "404": 0, "405": 0, "500": 0}
+
+count = 0
+total_size = 0
+
+try:
+    for line in sys.stdin:
+        if count != 0 and count % 10 == 0:
+            print_statistics(status_codes, total_size)
+
+        line_parts = line.split()
+        count += 1
+
         try:
-            parsed_line = line.split()
-            status_code = parsed_line[-2]
-            if status_code in st_code.keys():
-                st_code[status_code] += 1
-            return int(parsed_line[-1])
-        except Exception:
-            return 0
+            total_size += int(line_parts[-1])
+        except ValueError:
+            pass
 
-    def print_stats():
-        """print stats in ascending order"""
-        print("File size: {}".format(file_size))
-        for key in sorted(st_code.keys()):
-            if st_code[key]:
-                print("{}: {}".format(key, st_code[key]))
+        try:
+            status_code = line_parts[-2]
+            if status_code in status_codes:
+                status_codes[status_code] += 1
+        except IndexError:
+            pass
 
-    try:
-        for line in sys.stdin:
-            file_size += parse_line(line)
-            if count % 10 == 0:
-                print_stats()
-            count += 1
-    except KeyboardInterrupt:
-        print_stats()
-        raise
-    print_stats()
+    print_statistics(status_codes, total_size)
+
+except KeyboardInterrupt:
+    print_statistics(status_codes, total_size)
+    raise
