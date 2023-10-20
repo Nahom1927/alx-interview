@@ -1,100 +1,40 @@
 #!/usr/bin/python3
-'''solving nqueens problem'''
-import sys
-
-
-def is_valid(board, row, col):
-    """
-    Checks if a position of the queen is valid
-    Args:
-        board: 2D array representing the board
-        row: row of the queen
-        col: column of the queen
-    Returns:
-        Boolean: True if the position is valid, False otherwise
-    """
-    # Check this row on left side
-    if 1 in board[row]:
-        return False
-
-    upper_diag = zip(range(row, -1, -1),
-                     range(col, -1, -1))
-    for i, j in upper_diag:
-        if board[i][j] == 1:
-            return False
-
-    lower_diag = zip(range(row, len(board), 1),
-                     range(col, -1, -1))
-    for i, j in lower_diag:
-        if board[i][j] == 1:
-            return False
-
-    return True
-
-
-def nqueens_helper(board, col):
-    """
-    Helper function for nqueens
-    Args:
-        board: 2D array representing the board
-        col: column to start from
-    Returns:
-        Boolean: True if a solution is found, False otherwise
-    """
-    if col >= len(board):
-        print_board(board, len(board))
-    for i in range(len(board)):
-        if is_valid(board, i, col):
-            board[i][col] = 1
-            result = nqueens_helper(board, col + 1)
-            if result:
-                return True
-            board[i][col] = 0
-    return False
-
-
-def print_board(board, n):
-    """
-    Prints positions of the queens
-    Args:
-        board: 2D array representing the board
-        n: size of the board
-    Returns:
-        None
-    """
-    b = []
-
-    for i in range(n):
-        for j in range(n):
-            if board[i][j] == 1:
-                b.append([i, j])
-    print(b)
-
-
 def nqueens(n):
-    """
-    Finds all possible solutions to the n-queens problem
-    Args:
-        n: size of the board
-    Returns:
-        None
-    """
-    board = []
+  """
+  Finds all possible ways to place n queens on an n×n chessboard such that no two queens attack each other.
+
+  Args:
+    n: The number of queens.
+
+  Returns:
+    A list of all possible placements of the queens.
+  """
+  solutions = []
+  def backtrack(row, queens):
+    if row == n:
+      solutions.append(queens)
+      return
     for i in range(n):
-        row = [0] * n
-        board.append(row)
-    nqueens_helper(board, 0)
+      if is_valid(row, i, queens):
+        queens.append((row, i))
+        backtrack(row + 1, queens)
+        queens.pop()
+  backtrack(0, [])
+  return solutions
 
+def is_valid(row, col, queens):
+  """
+  Checks if a queen can be placed at the given row and column.
 
-if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        print("Usage: nqueens N")
-        exit(1)
-    queens = sys.argv[1]
-    if not queens.isnumeric():
-        print("N must be a number")
-        exit(1)
-    elif int(queens) < 4:
-        print("N must be at least 4")
-        exit(1)
-    nqueens(int(queens))
+  Args:
+    row: The row of the queen.
+    col: The column of the queen.
+    queens: A list of all the queens that have already been placed.
+
+  Returns:
+    True if the queen can be placed at the given row and column, False otherwise.
+  """
+  for queen in queens:
+    if queen[0] == row or queen[1] == col or abs(queen[0] - row) == abs(queen[1] - col):
+      return False
+  return True
