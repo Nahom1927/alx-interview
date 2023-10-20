@@ -1,83 +1,100 @@
 #!/usr/bin/python3
-"""N queens interview"""
+'''solving nqueens problem'''
 import sys
 
 
-solutions = []
+def is_valid(board, row, col):
+    """
+    Checks if a position of the queen is valid
+    Args:
+        board: 2D array representing the board
+        row: row of the queen
+        col: column of the queen
+    Returns:
+        Boolean: True if the position is valid, False otherwise
+    """
+    # Check this row on left side
+    if 1 in board[row]:
+        return False
 
-n = 0
+    upper_diag = zip(range(row, -1, -1),
+                     range(col, -1, -1))
+    for i, j in upper_diag:
+        if board[i][j] == 1:
+            return False
 
-pos = None
+    lower_diag = zip(range(row, len(board), 1),
+                     range(col, -1, -1))
+    for i, j in lower_diag:
+        if board[i][j] == 1:
+            return False
 
-
-def get_input():
-    """Retrieves and validates this programs argument"""
-    global n
-    n = 0
-    if len(sys.argv) != 2:
-        print("Usage: nqueens N")
-        sys.exit(1)
-    try:
-        n = int(sys.argv[1])
-    except Exception:
-        print("N must be a number")
-        sys.exit(1)
-    if n < 4:
-        print("N must be atleast 4")
-        sys.exit(1)
-    return n
-
-
-def is_attacking(pos0, pos1):
-    """Check if position of two queens are in attack mode"""
-    if (pos0[0] == pos1[0]) or (pos0[1] == pos1[1]):
-        return True
-    return abs(pos0[0] - pos1[0]) == abs(pos0[1] - pos1[1])
+    return True
 
 
-def group_exists(group):
-    """Check if group exists in the list of solutions."""
-    global solutions
-    for stn in solutions:
-        i = 0
-        for stn_pos in stn:
-            for grp_pos in group:
-                if stn_pos[0] == grp_pos[0] and stn_pos[1] == grp_pos[1]:
-                    i += 1
-        if i == n:
-            return True
+def nqueens_helper(board, col):
+    """
+    Helper function for nqueens
+    Args:
+        board: 2D array representing the board
+        col: column to start from
+    Returns:
+        Boolean: True if a solution is found, False otherwise
+    """
+    if col >= len(board):
+        print_board(board, len(board))
+    for i in range(len(board)):
+        if is_valid(board, i, col):
+            board[i][col] = 1
+            result = nqueens_helper(board, col + 1)
+            if result:
+                return True
+            board[i][col] = 0
     return False
 
 
-def build_solution(row, group):
-    """Builds a solution for the n queens problem"""
-    global solutions
-    global n
-    if row == n:
-        tmp0 = group.copy()
-        if not group_exists(tmp0):
-            solutions.append(tmp0)
-    else:
-        for col in range(n):
-            a = (row * n) + col
-            matches = zip(list([pos[a]]) * len(group), group)
-            used_positions = map(lambda x: is_attacking(x[0], x[1]), matches)
-            group.append(pos[a].copy())
-            if not any(used_positions):
-                build_solution(row + 1, group)
-            group.pop(len(group) - 1)
+def print_board(board, n):
+    """
+    Prints positions of the queens
+    Args:
+        board: 2D array representing the board
+        n: size of the board
+    Returns:
+        None
+    """
+    b = []
+
+    for i in range(n):
+        for j in range(n):
+            if board[i][j] == 1:
+                b.append([i, j])
+    print(b)
 
 
-def get_solutions():
-    """Gets the solution for the given chessboard size"""
-    global pos, n
-    pos = list(map(lambda x: [x // n, x % n], range(n ** 2)))
-    a = 0
-    group = []
-    build_solution(a, group)
+def nqueens(n):
+    """
+    Finds all possible solutions to the n-queens problem
+    Args:
+        n: size of the board
+    Returns:
+        None
+    """
+    board = []
+    for i in range(n):
+        row = [0] * n
+        board.append(row)
+    nqueens_helper(board, 0)
 
 
-n = get_input()
-get_solutions()
-for solution in solutions:
-    print(solution)
+if __name__ == "__main__":
+    if len(sys.argv) != 2:
+        print("Usage: nqueens N")
+        exit(1)
+    queens = sys.argv[1]
+    if not queens.isnumeric():
+        print("N must be a number")
+        exit(1)
+    elif int(queens) < 4:
+        print("N must be at least 4")
+        exit(1)
+    nqueens(int(queens))
