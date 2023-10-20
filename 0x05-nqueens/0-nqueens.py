@@ -1,62 +1,56 @@
 #!/usr/bin/python3
+"""Solving N Queens Problem using backtracking"""
 import sys
 
 
-if __name__ == '__main__':
-    if len(sys.argv) > 1:
-        try:
-            # number of queens we are solving for
-            board_size = int(sys.argv[1])
-        except Exception:
-            print("N must be a number")
-            exit(1)
-        if board_size < 4:
-            print("N must be at least 4")
-            exit(1)
+def printSolution(board, n):
+    """Print allocated positions to the queen"""
+    solution = []
 
-        # will hold current testing data
-        currentSolution = [0 for x in range(board_size)]
+    for r in range(n):
+        for c in range(n):
+            if c == board[r]:
+                solution.append([r, c])
+    print(solution)
 
-        # found solutions
-        solutions = []
 
-        def isSafe(testRow, testCol):
-            # no need to check for row 0
-            if testRow == 0:
-                return True
+def is_position_safe(board, r, c, row):
+    """Checks if the position is safe for the queen"""
+    return board[r] in (c, c - r + row, r - row + c)
 
-            for row in range(0, testRow):
 
-                # check vertical
-                if testCol == currentSolution[row]:
-                    return False
+def recursive_solve(board, row, n):
+    """Find all safe positions where the queen can be allocated"""
+    if row == n:
+        printSolution(board, n)
 
-                # diagonal
-                if abs(testRow - row) == abs(testCol - currentSolution[row]):
-                    return False
-
-            # no attack found
-            return True
-
-        def placeQueen(row):
-            global currentSolution, solutions, board_size
-            for col in range(board_size):
-                if not isSafe(row, col):
-                    continue
-                else:
-                    currentSolution[row] = col
-                    if row == (board_size - 1):
-                        #  last row
-                        solution = []
-                        for i in range(len(currentSolution)):
-                            solution.append([i, currentSolution[i]])
-                        solutions.append(solution)
-                    else:
-                        placeQueen(row + 1)
-
-        placeQueen(0)
-        for solution in solutions:
-            print(solution)
     else:
+        for c in range(n):
+            allowed = True
+            for r in range(row):
+                if is_position_safe(board, r, c, row):
+                    allowed = False
+            if allowed:
+                board[row] = c
+                recursive_solve(board, row + 1, n)
+
+
+def create_board(size):
+    """Generates the board"""
+    return [0 * size for i in range(size)]
+
+
+if __name__ == "__main__":
+    if len(sys.argv) != 2:
         print("Usage: nqueens N")
-        exit(1)
+        sys.exit(1)
+    if sys.argv[1].isdigit() is False:
+        print("N must be a number")
+        sys.exit(1)
+    if int(sys.argv[1]) < 4:
+        print("N must be at least 4")
+        sys.exit(1)
+
+    N = int(sys.argv[1])
+    myboard = create_board(N)
+    solutions = recursive_solve(myboard, 0, N)
